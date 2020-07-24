@@ -86,7 +86,9 @@ async function main(port) {
         break;
 
       case url === '/':
-        response.end(JSON.stringify(await getImageList()));
+        const list = await getImageList();
+        response.setHeader('Content-Type', 'application/json');
+        response.end(JSON.stringify(list.map(imageNmae => `${dockerRegistry}/${imageName}`)));
         break;
 
       default:
