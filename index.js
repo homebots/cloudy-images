@@ -62,8 +62,10 @@ async function startBuild(_, res) {
 
     LOG('info', { message: 'Build started' });
     images.forEach(imageName => {
-      const args = ['build', '--quiet', '-t', `${dockerRegistry}/${imageName}`, `images/${imageName}`];
+      const tag = `${dockerRegistry}/${imageName}`;
+      const args = ['build', '--quiet', '-t', tag, `images/${imageName}`];
       shellExec('docker', args);
+      shellExec('docker', ['push', tag]);
     });
   });
 }
