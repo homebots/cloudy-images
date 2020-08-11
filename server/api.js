@@ -37,7 +37,7 @@ export async function api() {
         await readRequestBody(request);
       }
 
-      LOG('info', { method, url, body: request.body, headers });
+      LOG('info', { method, url, headers });
 
       switch (true) {
         case method === 'POST' && url === '/build' && checkProtectedRoute(request, response, authKey):

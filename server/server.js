@@ -14,7 +14,7 @@ export async function buildAllImages() {
 
 export function buildImage(imageName) {
   const tag = `${dockerRegistry}/${imageName}`;
-  const args = ['build', '--quiet', '-t', tag, getFilePath('images', imageName)];
+  const args = ['build', '--no-cache', '-t', tag, getFilePath('images', imageName)];
 
   return shellExec('docker', args);
 }

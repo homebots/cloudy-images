@@ -10,8 +10,7 @@ case $1 in
 
   run*)
     cd /home/node/app
-    psy start -n app -- npm start
-    psy log -f app
+    node /home/node/monitor.js npm start
     ;;
 
 esac
