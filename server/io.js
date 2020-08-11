@@ -12,5 +12,5 @@ export async function readDir(...path) {
 }
 
 export async function readFile(...path) {
-  return asyncFS.readFile(getFilePath(...path)).toString('utf8').trim();
+  return (await asyncFS.readFile(getFilePath(...path))).toString('utf8').trim();
 }

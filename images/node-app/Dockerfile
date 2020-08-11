@@ -1,4 +1,4 @@
-FROM d.homebots.io/v2/homebots-node
+FROM d.homebots.io/v2/node
 
 ADD entrypoint.sh /home/node/
 WORKDIR /home/node/app
