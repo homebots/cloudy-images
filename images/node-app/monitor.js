@@ -1,10 +1,16 @@
 const spawn = require('child_process').spawn;
-const [command, ...args] = process.argv.slice(2);
+const FS = require('fs');
+const Path = require('path');
+const { createServer } = require('http');
+
 const options = {
   stdio: 'pipe',
   cwd: process.cwd(),
   env: process.env
 };
+
+const {command, args} = getCommand();
+console.log(command, args.join(' '));
 
 if (!command) {
   process.exit(1);
@@ -24,7 +30,6 @@ function restart(code) {
 
 function start() {
   restarting = false;
-  console.log(command, args.join(' '));
 
   const shell = spawn(command, args, options);
   const log = (buffer) => console.log(buffer.toString('utf8'));
@@ -37,6 +42,27 @@ function start() {
     console.error(error);
     restart(1);
   });
+}
+
+function getCommand() {
+  const packageJson = Path.join(process.cwd(), 'package.json');
+
+  if (FS.existsSync(packageJson)) {
+    const manifest = require(packageJson);
+    if (manifest.scripts && manifest.scripts.start) {
+      return { command: 'npm', args: ['start']};
+    }
+
+    if (manifest.main) {
+      return { command: 'node', args: [manifest.main] };
+    }
+  }
+
+  if (FS.existsSync(Path.join(process.cwd(), 'index.js'))) {
+    return { command: 'node', args: ['index.js']};
+  }
+
+  return { command: '', args: [] };
 }
 
 start();
