@@ -1,6 +1,6 @@
 case $1 in
   build*)
-    git clone --depth 1 "$2" /home/node/app
+    git clone --depth 1 "$2" -b "$3" /home/node/app
     cd /home/node/app
     (npm ci || npm i || true)
     (npm run build || true)
