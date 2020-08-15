@@ -129,16 +129,16 @@ export class HttpServer {
 
   async deserializeRequest(request) {
     return new Promise((resolve) => {
-      const outputFormat = this.configuration.output;
+      const inputFormat = this.configuration.input;
       let chunks = [];
 
       request.on('data', (chunk) => chunks.push(chunk));
       request.on('end', () => {
         const buffer = Buffer.concat(chunks);
 
-        switch (outputFormat) {
+        switch (inputFormat) {
           case Format.Json:
-            request.body = tryToParseJson(buffer.toString('utf8'))
+            request.body = tryToParseJson(buffer.toString('utf8'));
             break;
 
           case Format.Text:
