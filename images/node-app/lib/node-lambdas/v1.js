@@ -37,7 +37,7 @@ export class HttpServer {
 
     try {
       if (method === Http.Options) {
-        response.setHeader('Access-Control-Allow-Origin', '*');
+        this.setCorsHeaders(request, response);
         response.end();
         return;
       }
@@ -60,6 +60,7 @@ export class HttpServer {
         return;
       }
 
+      this.setCorsHeaders(request, response);
       await this.prepareInputAndOutput(request, response);
       this.handler(request, response);
     } catch (error) {
@@ -154,6 +155,10 @@ export class HttpServer {
         resolve();
       });
     });
+  }
+
+  setCorsHeaders(_, response) {
+    response.setHeader('access-control-allow-origin', '*');
   }
 
   serialiseResponse(value) {
