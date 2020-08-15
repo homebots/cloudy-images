@@ -124,7 +124,7 @@ export class HttpServer {
       send(status);
     };
 
-    response.reject = (message) => response.send(400, message || 'Invalid input');
+    response.reject = (message) => response.send(400, String(message || 'Invalid input'));
   }
 
   async deserializeRequest(request) {
