@@ -1,5 +1,5 @@
 import { createServer } from 'http';
-import { Format, uid, toJson, serialize } from './common.js';
+import { Format, uid, toJson, serialize, tryToParseJson, timestamp, HttpMethod as Http } from './common.js';
 
 /**
  * @param {Format} configuration.input
@@ -8,65 +8,75 @@ import { Format, uid, toJson, serialize } from './common.js';
  */
 export const lambda = (configuration, main) => new HttpServer(configuration, main);
 
-const Http = {
-  Get: 'GET',
-  Options: 'OPTIONS',
-  Post: 'POST',
-};
-
-const timestamp = () => new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-const tryToParseJson = (data) => {
-  try {
-    return JSON.parse(data);
-  } catch {
-    return data;
-  }
-};
-
 export class HttpServer {
   constructor(configuration, handler) {
-    this.configuration = configuration;
+    this.configuration = this.getConfiguration(configuration);
     this.handler = handler;
     this.server = createServer((request, response) => this.dispatch(request, response));
     this.server.listen(process.env.PORT);
   }
 
   async dispatch(request, response) {
-    const { method } = request;
-
     try {
-      if (method === Http.Options) {
-        this.setCorsHeaders(request, response);
-        response.end();
-        return;
+      const { method } = request;
+      switch (true) {
+        case method === Http.Options:
+          return this.sendCorsPreflight(request, response);
+
+        case method === Http.Get:
+          return this.sendToLambdaDocumentation(request, response);
+
+        case method !== Http.Post:
+          return this.sendMethodNotAllowed(request, response);
+
+        default:
+          return await this.executeLambda(request, response);
       }
-
-      if (method === Http.Get) {
-        const host = request.headers['host'];
-
-        response.setHeader(
-          'Location',
-          'https://github.com/node-lambdas/' + (host.endsWith('.jsfn.run') ? host.replace('.jsfn.run', '') : ''),
-        );
-        response.writeHead(302);
-        response.end('');
-        return;
-      }
-
-      if (method !== Http.Post) {
-        response.writeHead(405);
-        response.end('');
-        return;
-      }
-
-      this.setCorsHeaders(request, response);
-      await this.prepareInputAndOutput(request, response);
-      this.handler(request, response);
     } catch (error) {
       this.logError(request.id, error);
       response.send(500, { traceId: request.id });
     }
+  }
+
+  getConfiguration(configuration) {
+    if (!!configuration.input) {
+      configuration.readBody = true;
+    }
+
+    return configuration;
+  }
+
+  async executeLambda(request, response) {
+    this.setCorsHeaders(request, response);
+    await this.prepareInputAndOutput(request, response);
+
+    if (request.body === null && this.configuration.input === Format.Json) {
+      response.reject('Invalid JSON');
+      return;
+    }
+
+    this.handler(request, response);
+  }
+
+  sendMethodNotAllowed(_, response) {
+    response.writeHead(405);
+    response.end();
+  }
+
+  sendCorsPreflight(request, response) {
+    this.setCorsHeaders(request, response);
+    response.end();
+  }
+
+  sendToLambdaDocumentation(request, response) {
+    const host = request.headers['host'];
+
+    response.setHeader(
+      'Location',
+      'https://github.com/node-lambdas/' + (host.endsWith('.jsfn.run') ? host.replace('.jsfn.run', '') : ''),
+    );
+    response.writeHead(302);
+    response.end();
   }
 
   async prepareInputAndOutput(request, response) {
@@ -125,7 +135,7 @@ export class HttpServer {
       send(status);
     };
 
-    response.reject = (message) => response.send(400, String(message || 'Invalid input'));
+    response.reject = (message) => response.send(400, String(message || 'Invalid input') + '\n');
   }
 
   async deserializeRequest(request) {
