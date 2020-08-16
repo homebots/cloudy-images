@@ -45,6 +45,7 @@ function start() {
 
 function getCommand() {
   const packageJson = Path.join(process.cwd(), 'package.json');
+  const serviceJson = Path.join(process.cwd(), 'service.json');
 
   if (FS.existsSync(packageJson)) {
     const manifest = require(packageJson);
@@ -54,6 +55,13 @@ function getCommand() {
 
     if (manifest.main) {
       return { command: 'node', args: [manifest.main] };
+    }
+  }
+
+  if (FS.existsSync(serviceJson)) {
+    const serviceConfig = require(serviceJson);
+    if (serviceConfig.domain && serviceConfig.domain.includes('.jsfn.run')) {
+      return { command: 'fn', args: ['--serve'] };
     }
   }
 
