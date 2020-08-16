@@ -4,7 +4,6 @@ case $1 in
     cd /home/node/app
     (npm ci || npm i || true)
     (npm run build || true)
-    npm link node-lambdas
     ;;
 
   run*)

@@ -1,4 +1,4 @@
-const spawn = require('child_process').spawn;
+const { spawn, execSync } = require('child_process');
 const FS = require('fs');
 const Path = require('path');
 
@@ -61,7 +61,7 @@ function getCommand() {
   if (FS.existsSync(serviceJson)) {
     const serviceConfig = require(serviceJson);
     if (serviceConfig.domain && serviceConfig.domain.includes('.jsfn.run')) {
-      return { command: 'fn', args: ['--serve'] };
+      execSync('npm i --no-save @node-lambdas/core');
     }
   }
 
