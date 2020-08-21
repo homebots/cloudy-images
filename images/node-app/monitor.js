@@ -5,7 +5,7 @@ const Path = require('path');
 const options = {
   stdio: 'pipe',
   cwd: process.cwd(),
-  env: process.env
+  env: process.env,
 };
 
 const { command, args } = getCommand();
@@ -61,7 +61,7 @@ function getCommand() {
   if (FS.existsSync(serviceJson)) {
     const serviceConfig = require(serviceJson);
     if (serviceConfig.domain && serviceConfig.domain.includes('.jsfn.run')) {
-      execSync('npm i --no-save @node-lambdas/core');
+      execSync('npm i --no-save @node-lambdas/core@latest');
     }
   }
 
