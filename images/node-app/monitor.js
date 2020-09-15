@@ -46,6 +46,11 @@ function start() {
 function getCommand() {
   const packageJson = Path.join(process.cwd(), 'package.json');
   const serviceJson = Path.join(process.cwd(), 'service.json');
+  const staticsJson = Path.join(process.cwd(), 'superstatic.json');
+
+  if (FS.existsSync(staticsJson)) {
+    return { command: 'superstatic', args: ['--port', '$PORT'] };
+  }
 
   if (FS.existsSync(packageJson)) {
     const manifest = require(packageJson);

@@ -1,12 +1,16 @@
 import { createServer } from 'http';
 import { createHmac } from 'crypto';
-import { readFile } from './io.js'
+import { readFile } from './io.js';
 import { buildAllImages, getImageList } from './server.js';
 import { LOG } from './log.js';
 
 function checkProtectedRoute(req, res, authKey) {
   const requestSignature = req.headers['x-hub-signature'];
-  const payloadSignature = 'sha1=' + createHmac('sha1', authKey).update(req.body || '').digest('hex');
+  const payloadSignature =
+    'sha1=' +
+    createHmac('sha1', authKey)
+      .update(req.body || '')
+      .digest('hex');
 
   if (payloadSignature !== requestSignature) {
     LOG('error', { message: `Invalid signature: ${requestSignature}, expected ${payloadSignature}` });
@@ -47,7 +51,7 @@ export async function api() {
         case url === '/':
           const imageList = await getImageList();
           response.setHeader('Content-Type', 'application/json');
-          response.end(JSON.stringify(imageList.map(imageName => `${dockerRegistry}/${imageName}`)));
+          response.end(JSON.stringify(imageList.map((imageName) => `${dockerRegistry}/${imageName}`)));
           break;
 
         default:
@@ -55,6 +59,7 @@ export async function api() {
           response.end();
       }
     } catch (error) {
+      LOG('error', error);
       response.writeHead(500);
       response.end();
     }
@@ -64,9 +69,9 @@ export async function api() {
 }
 
 function readRequestBody(request) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     request.body = '';
-    request.on('data', chunk => request.body += String(chunk));
+    request.on('data', (chunk) => (request.body += String(chunk)));
     request.on('end', () => resolve());
   });
 }
