@@ -5,4 +5,7 @@ ENV HOME=/home/node
 WORKDIR /home/node
 ADD conf/.npmrc /home/node
 RUN set -xe && apk add --no-cache bash git openssh nano python
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser /home/node
+USER appuser
 ENV PATH "$PATH:/home/node/npm/bin"
