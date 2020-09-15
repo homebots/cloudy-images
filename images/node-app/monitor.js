@@ -49,7 +49,7 @@ function getCommand() {
   const staticsJson = Path.join(process.cwd(), 'superstatic.json');
 
   if (FS.existsSync(staticsJson)) {
-    return { command: 'superstatic', args: ['--port', process.env.PORT] };
+    return { command: 'superstatic', args: ['--port', process.env.PORT, '--host', '0.0.0.0', '--debug', 'true'] };
   }
 
   if (FS.existsSync(packageJson)) {
