@@ -4,6 +4,8 @@ import { readFile } from './io.js';
 import { buildAllImages, getImageList } from './server.js';
 import { LOG } from './log.js';
 
+const dockerRegistry = process.env.CLOUDY_DOCKER_REGISTRY || 'cloudy';
+
 function checkProtectedRoute(req, res, authKey) {
   const requestSignature = req.headers['x-hub-signature'];
   const payloadSignature =
